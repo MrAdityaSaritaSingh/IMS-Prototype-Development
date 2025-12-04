@@ -7,12 +7,15 @@ import { StatusChip } from '../StatusChip';
 import { mockDrives } from '../../data/mockData';
 import { CreateDriveWizard } from './CreateDriveWizard';
 
+import { useAuth } from '../../contexts/AuthContext';
+
 interface RecruiterDashboardProps {
   onNavigate: (page: string) => void;
 }
 
 export function RecruiterDashboard({ onNavigate }: RecruiterDashboardProps) {
-  const myDrives = mockDrives.filter(d => d.createdBy === 'recruiter1');
+  const { user } = useAuth();
+  const myDrives = mockDrives.filter(d => d.createdBy === user?.id);
   const draftDrives = myDrives.filter(d => d.status === 'draft');
   const pendingDrives = myDrives.filter(d => d.status === 'pending_review');
   const publishedDrives = myDrives.filter(d => d.status === 'published');
@@ -41,38 +44,6 @@ export function RecruiterDashboard({ onNavigate }: RecruiterDashboardProps) {
     );
   }
 
-  if (view === 'my-drives') {
-    // In a real app, MyDrives would handle the list and callback for editing
-    // For now, we'll just show the dashboard or a placeholder
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-4 mb-6">
-          <Button variant="secondary" onClick={() => setView('dashboard')}>Back</Button>
-          <h2 className="text-xl font-bold">My Drives</h2>
-        </div>
-        {/* Reusing the list logic here for simplicity or importing MyDrives component */}
-        <div className="space-y-4">
-          {myDrives.map(drive => (
-            <div key={drive.id} className="bg-white p-4 rounded-lg border flex justify-between items-center">
-              <div>
-                <h3 className="font-medium">{drive.companyName}</h3>
-                <p className="text-sm text-gray-500">{drive.role}</p>
-              </div>
-              <div className="flex gap-2">
-                <StatusChip status={drive.status} />
-                {(drive.status === 'draft' || drive.status === 'pending_review') && (
-                  <Button size="sm" variant="secondary" onClick={() => handleEditDrive(drive)}>
-                    Edit
-                  </Button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -92,20 +63,20 @@ export function RecruiterDashboard({ onNavigate }: RecruiterDashboardProps) {
           title="Draft Drives"
           value={draftDrives.length}
           icon={<FileText size={24} />}
-          onClick={() => setView('my-drives')}
+          onClick={() => onNavigate('my-drives')}
         />
         <StatCard
           title="Pending SPC Review"
           value={pendingDrives.length}
           icon={<Clock size={24} />}
-          onClick={() => setView('my-drives')}
+          onClick={() => onNavigate('my-drives')}
         />
         <StatCard
           title="Published Drives"
           value={publishedDrives.length}
           icon={<CheckCircle size={24} />}
           trend={{ value: `${publishedDrives.reduce((sum, d) => sum + (d.registrations || 0), 0)} registrations`, positive: true }}
-          onClick={() => setView('my-drives')}
+          onClick={() => onNavigate('my-drives')}
         />
         <StatCard
           title="Total Drives"
@@ -122,7 +93,7 @@ export function RecruiterDashboard({ onNavigate }: RecruiterDashboardProps) {
             <Plus size={18} />
             Create New Drive
           </Button>
-          <Button variant="secondary" onClick={() => setView('my-drives')}>
+          <Button variant="secondary" onClick={() => onNavigate('my-drives')}>
             <Briefcase size={18} />
             View All Drives
           </Button>
@@ -139,7 +110,7 @@ export function RecruiterDashboard({ onNavigate }: RecruiterDashboardProps) {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-[#111827]">Recent Drives</h3>
             <button
-              onClick={() => setView('my-drives')}
+              onClick={() => onNavigate('my-drives')}
               className="text-sm text-[#2563EB] hover:underline"
             >
               View All

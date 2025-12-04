@@ -31,7 +31,9 @@ export function Login() {
   const demoAccounts = [
     { role: 'Student', email: 'rajesh.kumar@college.edu', password: 'demo123' },
     { role: 'SPC Admin', email: 'priya.sharma@college.edu', password: 'demo123' },
-    { role: 'Recruiter', email: 'ankit.verma@techcorp.com', password: 'demo123' }
+    { role: 'Recruiter (Google)', email: 'larry@google.com', password: 'demo123' },
+    { role: 'Recruiter (Eightfold)', email: 'ashutosh@eightfold.ai', password: 'demo123' },
+    { role: 'Recruiter (NVIDIA)', email: 'jensen@nvidia.com', password: 'demo123' }
   ];
 
   return (

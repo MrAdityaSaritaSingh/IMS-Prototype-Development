@@ -7,19 +7,22 @@ import { StatusChip } from '../StatusChip';
 import { mockDrives } from '../../data/mockData';
 import { Drive } from '../../types';
 
+import { useAuth } from '../../contexts/AuthContext';
+
 interface MyDrivesProps {
   onViewDrive: (drive: Drive) => void;
 }
 
 export function MyDrives({ onViewDrive }: MyDrivesProps) {
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
 
-  const myDrives = mockDrives.filter(d => d.createdBy === 'recruiter1');
+  const myDrives = mockDrives.filter(d => d.createdBy === user?.id);
 
   const filteredDrives = myDrives.filter(drive => {
     const matchesSearch = drive.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         drive.role.toLowerCase().includes(searchQuery.toLowerCase());
+      drive.role.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = filterStatus === 'all' || drive.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
