@@ -176,13 +176,38 @@ export const mockDrives: Drive[] = [
     createdBy: 'recruiter_nvidia',
     createdAt: '2025-12-02T10:00:00',
     registrations: 60
+  },
+  // EightCloud Drives
+  {
+    id: 'drive_eightcloud_devops',
+    companyName: 'EightCloud',
+    role: 'DevOps Engineer',
+    ctc: 1800000,
+    mode: 'On-Campus',
+    location: 'Remote',
+    hrName: 'Ankit Verma',
+    hrEmail: 'ankit.verma@techcorp.com',
+    stipend: 45000,
+    eligibilityCriteria: {
+      minCGPA: 7.0,
+      allowedBranches: ['B.Tech - CSE', 'B.Tech - IT'],
+      allowedYears: ['2025'],
+      maxBacklogs: 1
+    },
+    description: 'Join our DevOps team to build and maintain scalable infrastructure.',
+    process: ['Online Assessment', 'Technical Interview', 'HR Round'],
+    deadline: '2025-12-20T23:59:59',
+    status: 'pending_review',
+    createdBy: 'recruiter1',
+    createdAt: '2025-12-04T09:00:00',
+    registrations: 0
   }
 ];
 
 export const mockApplications: Application[] = [
   {
     id: 'app1',
-    driveId: 'drive1',
+    driveId: 'drive_nvidia_hw',
     studentId: 'student1',
     status: 'shortlisted',
     appliedAt: '2025-11-22T10:30:00',
@@ -191,7 +216,7 @@ export const mockApplications: Application[] = [
   },
   {
     id: 'app2',
-    driveId: 'drive2',
+    driveId: 'drive_eightfold_ai',
     studentId: 'student1',
     status: 'registered',
     appliedAt: '2025-11-26T14:20:00',
@@ -200,7 +225,7 @@ export const mockApplications: Application[] = [
   },
   {
     id: 'app3',
-    driveId: 'drive3',
+    driveId: 'drive_google_sde', // Student applied before eligibility change or special case
     studentId: 'student1',
     status: 'offered',
     appliedAt: '2025-11-18T09:15:00',
@@ -214,7 +239,7 @@ export const mockOffers: Offer[] = [
     id: 'offer1',
     driveId: 'drive3',
     studentId: 'student1',
-    companyName: 'InnovateSoft',
+    companyName: 'Google',
     role: 'Full Stack Developer',
     ctc: 4500000,
     joiningDate: '2025-07-01',
