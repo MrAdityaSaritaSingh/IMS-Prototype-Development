@@ -7,31 +7,34 @@ import { useToast } from '../Toast';
 import { Modal } from '../Modal';
 import { curriculumData } from '../../data/curriculumData';
 
+import { Drive } from '../../types';
+
 interface CreateDriveWizardProps {
   onBack: () => void;
   onComplete: () => void;
+  initialData?: Drive;
 }
 
-export function CreateDriveWizard({ onBack, onComplete }: CreateDriveWizardProps) {
+export function CreateDriveWizard({ onBack, onComplete, initialData }: CreateDriveWizardProps) {
   const [step, setStep] = useState(1);
   const { showToast } = useToast();
 
   // Form data
   // Step 1: Basic Info
-  const [companyName, setCompanyName] = useState('');
-  const [hrName, setHrName] = useState('');
-  const [hrEmail, setHrEmail] = useState('');
-  const [location, setLocation] = useState('');
-  const [mode, setMode] = useState('On-Campus');
+  const [companyName, setCompanyName] = useState(initialData?.companyName || '');
+  const [hrName, setHrName] = useState(initialData?.hrName || '');
+  const [hrEmail, setHrEmail] = useState(initialData?.hrEmail || '');
+  const [location, setLocation] = useState(initialData?.location || '');
+  const [mode, setMode] = useState(initialData?.mode || 'On-Campus');
 
   // Step 2: JD & Eligibility
-  const [role, setRole] = useState('');
-  const [description, setDescription] = useState('');
-  const [deadline, setDeadline] = useState('');
-  const [minCGPA, setMinCGPA] = useState('7.0');
-  const [maxBacklogs, setMaxBacklogs] = useState('0');
-  const [branches, setBranches] = useState<string[]>(['B.Tech - CSE', 'B.Tech - IT']);
-  const [years, setYears] = useState<string[]>(['2024', '2025']);
+  const [role, setRole] = useState(initialData?.role || '');
+  const [description, setDescription] = useState(initialData?.description || '');
+  const [deadline, setDeadline] = useState(initialData?.deadline || '');
+  const [minCGPA, setMinCGPA] = useState(initialData?.eligibilityCriteria?.minCGPA.toString() || '7.0');
+  const [maxBacklogs, setMaxBacklogs] = useState(initialData?.eligibilityCriteria?.maxBacklogs.toString() || '0');
+  const [branches, setBranches] = useState<string[]>(initialData?.eligibilityCriteria?.allowedBranches || ['B.Tech - CSE', 'B.Tech - IT']);
+  const [years, setYears] = useState<string[]>(initialData?.eligibilityCriteria?.allowedYears || ['2024', '2025']);
 
   // Smart Branch Selection State
   const [isOpenForAll, setIsOpenForAll] = useState(false);
@@ -39,11 +42,11 @@ export function CreateDriveWizard({ onBack, onComplete }: CreateDriveWizardProps
   const [selectedBranchCurriculum, setSelectedBranchCurriculum] = useState<string | null>(null);
 
   // Step 3: Process Flow
-  const [process, setProcess] = useState<string[]>(['Online Assessment', 'Technical Interview']);
+  const [process, setProcess] = useState<string[]>(initialData?.process || ['Online Assessment', 'Technical Interview']);
 
   // Step 4: Compensation
-  const [ctc, setCTC] = useState('');
-  const [stipend, setStipend] = useState('');
+  const [ctc, setCTC] = useState(initialData?.ctc.toString() || '');
+  const [stipend, setStipend] = useState(initialData?.stipend?.toString() || '');
   const [basePay, setBasePay] = useState('');
   const [variablePay, setVariablePay] = useState('');
 
@@ -70,7 +73,7 @@ export function CreateDriveWizard({ onBack, onComplete }: CreateDriveWizardProps
   };
 
   const handleSubmit = () => {
-    showToast('Drive submitted for SPC review!', 'success');
+    showToast('Drive submitted for Placement Cell review!', 'success');
     setTimeout(onComplete, 1000);
   };
 

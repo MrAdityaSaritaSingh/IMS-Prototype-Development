@@ -5,6 +5,7 @@ import { FileText, Clock, CheckCircle, Plus, Briefcase } from 'lucide-react';
 import { Button } from '../Button';
 import { StatusChip } from '../StatusChip';
 import { mockDrives } from '../../data/mockData';
+import { CreateDriveWizard } from './CreateDriveWizard';
 
 interface RecruiterDashboardProps {
   onNavigate: (page: string) => void;
@@ -16,6 +17,62 @@ export function RecruiterDashboard({ onNavigate }: RecruiterDashboardProps) {
   const pendingDrives = myDrives.filter(d => d.status === 'pending_review');
   const publishedDrives = myDrives.filter(d => d.status === 'published');
 
+  const [view, setView] = React.useState<'dashboard' | 'create' | 'my-drives'>('dashboard');
+  const [editingDrive, setEditingDrive] = React.useState<any>(null);
+
+  const handleCreateDrive = () => {
+    setEditingDrive(null);
+    setView('create');
+  };
+
+  const handleEditDrive = (drive: any) => {
+    setEditingDrive(drive);
+    setView('create');
+  };
+
+  if (view === 'create') {
+    return (
+      <CreateDriveWizard
+        key={editingDrive?.id || 'new'}
+        onBack={() => setView('dashboard')}
+        onComplete={() => setView('dashboard')}
+        initialData={editingDrive}
+      />
+    );
+  }
+
+  if (view === 'my-drives') {
+    // In a real app, MyDrives would handle the list and callback for editing
+    // For now, we'll just show the dashboard or a placeholder
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4 mb-6">
+          <Button variant="secondary" onClick={() => setView('dashboard')}>Back</Button>
+          <h2 className="text-xl font-bold">My Drives</h2>
+        </div>
+        {/* Reusing the list logic here for simplicity or importing MyDrives component */}
+        <div className="space-y-4">
+          {myDrives.map(drive => (
+            <div key={drive.id} className="bg-white p-4 rounded-lg border flex justify-between items-center">
+              <div>
+                <h3 className="font-medium">{drive.companyName}</h3>
+                <p className="text-sm text-gray-500">{drive.role}</p>
+              </div>
+              <div className="flex gap-2">
+                <StatusChip status={drive.status} />
+                {(drive.status === 'draft' || drive.status === 'pending_review') && (
+                  <Button size="sm" variant="secondary" onClick={() => handleEditDrive(drive)}>
+                    Edit
+                  </Button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -23,7 +80,7 @@ export function RecruiterDashboard({ onNavigate }: RecruiterDashboardProps) {
           <h2 className="text-[#111827] mb-2">Recruiter Dashboard</h2>
           <p className="text-[#6B7280]">Manage your placement drives and track applications</p>
         </div>
-        <Button onClick={() => onNavigate('create-drive')}>
+        <Button onClick={handleCreateDrive}>
           <Plus size={20} />
           Create New Drive
         </Button>
@@ -35,20 +92,20 @@ export function RecruiterDashboard({ onNavigate }: RecruiterDashboardProps) {
           title="Draft Drives"
           value={draftDrives.length}
           icon={<FileText size={24} />}
-          onClick={() => onNavigate('my-drives')}
+          onClick={() => setView('my-drives')}
         />
         <StatCard
           title="Pending SPC Review"
           value={pendingDrives.length}
           icon={<Clock size={24} />}
-          onClick={() => onNavigate('my-drives')}
+          onClick={() => setView('my-drives')}
         />
         <StatCard
           title="Published Drives"
           value={publishedDrives.length}
           icon={<CheckCircle size={24} />}
           trend={{ value: `${publishedDrives.reduce((sum, d) => sum + (d.registrations || 0), 0)} registrations`, positive: true }}
-          onClick={() => onNavigate('my-drives')}
+          onClick={() => setView('my-drives')}
         />
         <StatCard
           title="Total Drives"
@@ -61,11 +118,11 @@ export function RecruiterDashboard({ onNavigate }: RecruiterDashboardProps) {
       <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
         <h3 className="text-[#111827] mb-4">Quick Actions</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <Button onClick={() => onNavigate('create-drive')}>
+          <Button onClick={handleCreateDrive}>
             <Plus size={18} />
             Create New Drive
           </Button>
-          <Button variant="secondary" onClick={() => onNavigate('my-drives')}>
+          <Button variant="secondary" onClick={() => setView('my-drives')}>
             <Briefcase size={18} />
             View All Drives
           </Button>
@@ -82,7 +139,7 @@ export function RecruiterDashboard({ onNavigate }: RecruiterDashboardProps) {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-[#111827]">Recent Drives</h3>
             <button
-              onClick={() => onNavigate('my-drives')}
+              onClick={() => setView('my-drives')}
               className="text-sm text-[#2563EB] hover:underline"
             >
               View All
@@ -96,7 +153,7 @@ export function RecruiterDashboard({ onNavigate }: RecruiterDashboardProps) {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.1 }}
                 className="flex items-center justify-between p-3 bg-[#F3F4F6] rounded-lg hover:bg-[#E5E7EB] transition-colors cursor-pointer"
-                onClick={() => onNavigate('my-drives')}
+                onClick={() => handleEditDrive(drive)}
               >
                 <div>
                   <p className="font-medium text-[#111827] text-sm">{drive.companyName}</p>
@@ -149,7 +206,10 @@ export function RecruiterDashboard({ onNavigate }: RecruiterDashboardProps) {
                 </p>
               </div>
             </div>
-            <Button onClick={() => onNavigate('my-drives')}>
+            <Button onClick={() => {
+              setEditingDrive(draftDrives[0]);
+              setView('create');
+            }}>
               Continue Editing
             </Button>
           </div>
@@ -162,13 +222,13 @@ export function RecruiterDashboard({ onNavigate }: RecruiterDashboardProps) {
             <div className="flex items-center gap-3">
               <Clock size={24} className="text-[#F59E0B]" />
               <div>
-                <h3 className="text-[#111827] mb-1">Awaiting SPC Review</h3>
+                <h3 className="text-[#111827] mb-1">Awaiting Placement Cell Review</h3>
                 <p className="text-sm text-[#6B7280]">
                   {pendingDrives.length} drive{pendingDrives.length !== 1 ? 's' : ''} pending approval
                 </p>
               </div>
             </div>
-            <Button variant="secondary" onClick={() => onNavigate('my-drives')}>
+            <Button variant="secondary" onClick={() => setView('my-drives')}>
               View Status
             </Button>
           </div>
