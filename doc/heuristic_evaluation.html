@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>heuristic_evaluation.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="heuristic-evaluation-report-ims-prototype">Heuristic Evaluation Report: IMS Prototype</h1>
+<p><strong>Date:</strong> December 4, 2025
+<strong>System:</strong> Institute Management System (IMS) - High-Fidelity Prototype</p>
+<hr>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>The IMS prototype demonstrates a strong foundation in usability, particularly in its clean aesthetic and role-based workflows. The recent additions of the <strong>Student Placement Timeline</strong> and <strong>Recruiter Edit Flow</strong> have significantly improved system visibility and user control. However, minor gaps remain in error prevention (undo actions) and comprehensive help documentation. The system scores highly on consistency and match with real-world processes.</p>
+<hr>
+<h2 id="detailed-heuristic-analysis">Detailed Heuristic Analysis</h2>
+<h3 id="heuristic-1-visibility-of-system-status">Heuristic 1: Visibility of System Status</h3>
+<p><em>The system should always keep users informed about what is going on, through appropriate feedback within a reasonable time.</em></p>
+<p><img src="heuristic_visibility_timeline.png" alt="Student Timeline"></p>
+<ul>
+<li><strong>Observations:</strong>
+<ul>
+<li><strong>Student Dashboard:</strong> The new <code>PlacementTimeline</code> component clearly visualizes the application lifecycle (Applied → Shortlisted → Interview → Offer).</li>
+<li><strong>Recruiter Wizard:</strong> The 5-step progress bar explicitly shows the current step and total steps.</li>
+<li><strong>Feedback:</strong> Toast notifications (&quot;Drive submitted&quot;, &quot;Offer accepted&quot;) provide immediate feedback for actions.</li>
+</ul>
+</li>
+<li><strong>Issues Identified:</strong>
+<ul>
+<li>Loading states during data fetching (e.g., dashboard load) are currently implicit (no skeleton screens observed in code).</li>
+</ul>
+</li>
+<li><strong>Severity:</strong> 2 (Minor Usability Problem)</li>
+<li><strong>Recommendations:</strong>
+<ul>
+<li>Implement skeleton loaders for dashboard cards to indicate data fetching status.</li>
+</ul>
+</li>
+</ul>
+<h3 id="heuristic-2-match-between-system-and-the-real-world-language">Heuristic 2: Match Between System and the Real-World Language</h3>
+<p><em>The system should speak the users' language, with words, phrases, and concepts familiar to the user.</em></p>
+<p><img src="heuristic_match_language.png" alt="Recruiter Wizard"></p>
+<ul>
+<li><strong>Observations:</strong>
+<ul>
+<li>Terminology matches the domain perfectly: &quot;CTC&quot;, &quot;Stipend&quot;, &quot;Backlogs&quot;, &quot;Drive&quot;, &quot;Shortlist&quot;.</li>
+<li>The &quot;Smart Branch Selection&quot; uses academic terms like &quot;B.Tech - CSE&quot; which is familiar to recruiters and SPCs.</li>
+</ul>
+</li>
+<li><strong>Issues Identified:</strong>
+<ul>
+<li>None significant. The language is well-aligned with the target audience (Institute Placement Cells).</li>
+</ul>
+</li>
+<li><strong>Severity:</strong> 0 (No Usability Problem)</li>
+<li><strong>Recommendations:</strong>
+<ul>
+<li>Maintain this consistency in future features.</li>
+</ul>
+</li>
+</ul>
+<h3 id="heuristic-3-user-control-and-freedom">Heuristic 3: User Control and Freedom</h3>
+<p><em>Users often choose system functions by mistake and will need a clearly marked &quot;emergency exit&quot; to leave the unwanted state.</em></p>
+<p><img src="heuristic_control_modal.png" alt="Offer Modal"></p>
+<ul>
+<li><strong>Observations:</strong>
+<ul>
+<li><strong>Recruiter Wizard:</strong> Users can navigate &quot;Back&quot; to previous steps.</li>
+<li><strong>Modals:</strong> All modals (Offer Accept/Decline, Curriculum View) have clear &quot;Cancel&quot; or &quot;Close&quot; buttons.</li>
+<li><strong>Edit Flow:</strong> Recruiters can now &quot;Continue Editing&quot; drafts, preventing data loss if they leave midway.</li>
+</ul>
+</li>
+<li><strong>Issues Identified:</strong>
+<ul>
+<li>There is no &quot;Undo&quot; option for critical actions like &quot;Decline Offer&quot; (though a confirmation modal exists).</li>
+</ul>
+</li>
+<li><strong>Severity:</strong> 2 (Minor Usability Problem)</li>
+<li><strong>Recommendations:</strong>
+<ul>
+<li>Consider a short &quot;Undo&quot; toast window (5-10s) for actions like declining an offer or deleting a draft.</li>
+</ul>
+</li>
+</ul>
+<h3 id="heuristic-4-consistency-and-standards">Heuristic 4: Consistency and Standards</h3>
+<p><em>Users should not have to wonder whether different words, situations, or actions mean the same thing.</em></p>
+<ul>
+<li><strong>Observations:</strong>
+<ul>
+<li><strong>Visual Design:</strong> Consistent color tokens (Primary Blue <code>#2563EB</code>, Success Green <code>#16A34A</code>) used across all roles.</li>
+<li><strong>Components:</strong> Buttons, Inputs, and Cards follow a strict design system.</li>
+<li><strong>Navigation:</strong> Top navigation bar is consistent, though the spec requested a Sidebar for SPC/Recruiter (a deviation, but internally consistent).</li>
+</ul>
+</li>
+<li><strong>Issues Identified:</strong>
+<ul>
+<li>Navigation structure deviates from the original spec (Top Nav vs Sidebar), which might be inconsistent with complex admin dashboard standards.</li>
+</ul>
+</li>
+<li><strong>Severity:</strong> 1 (Cosmetic Problem)</li>
+<li><strong>Recommendations:</strong>
+<ul>
+<li>Migrate SPC and Recruiter views to a Sidebar navigation layout to better accommodate growing administrative features.</li>
+</ul>
+</li>
+</ul>
+<h3 id="heuristic-5-error-prevention">Heuristic 5: Error Prevention</h3>
+<p><em>Even better than good error messages is a careful design which prevents a problem from occurring in the first place.</em></p>
+<p><img src="heuristic_error_prevention.png" alt="Wizard Validation"></p>
+<ul>
+<li><strong>Observations:</strong>
+<ul>
+<li><strong>Offer Page:</strong> Confirmation modals require explicit acknowledgement (&quot;I acknowledge...&quot;) before accepting, preventing accidental clicks.</li>
+<li><strong>Wizard:</strong> &quot;Next&quot; button validation prevents moving forward without required fields.</li>
+<li><strong>Eligibility:</strong> Students cannot register for drives they are not eligible for (button disabled).</li>
+</ul>
+</li>
+<li><strong>Issues Identified:</strong>
+<ul>
+<li>No &quot;Save as Draft&quot; button in the Wizard; it autosaves or relies on state persistence, which isn't explicitly clear to the user.</li>
+</ul>
+</li>
+<li><strong>Severity:</strong> 2 (Minor Usability Problem)</li>
+<li><strong>Recommendations:</strong>
+<ul>
+<li>Add an explicit &quot;Save Draft&quot; button in the Recruiter Wizard for peace of mind.</li>
+</ul>
+</li>
+</ul>
+<h3 id="heuristic-6-recognition-rather-than-recall">Heuristic 6: Recognition Rather Than Recall</h3>
+<p><em>Minimize the user's memory load by making objects, actions, and options visible.</em></p>
+<ul>
+<li><strong>Observations:</strong>
+<ul>
+<li><strong>Smart Suggestions:</strong> The &quot;Suggest from JD&quot; feature helps recruiters select branches without recalling every specific degree code.</li>
+<li><strong>Curriculum Modal:</strong> Recruiters can view curriculum details in-context without leaving the wizard.</li>
+<li><strong>Dashboard:</strong> &quot;Quick Actions&quot; provide visible shortcuts to common tasks.</li>
+</ul>
+</li>
+<li><strong>Issues Identified:</strong>
+<ul>
+<li>In the &quot;Process&quot; step of the wizard, users have to manually type round names. Pre-defined chips (e.g., &quot;Aptitude&quot;, &quot;Coding&quot;, &quot;HR&quot;) would aid recognition.</li>
+</ul>
+</li>
+<li><strong>Severity:</strong> 1 (Cosmetic Problem)</li>
+<li><strong>Recommendations:</strong>
+<ul>
+<li>Add &quot;Common Rounds&quot; chips in the Process step for one-click addition.</li>
+</ul>
+</li>
+</ul>
+<h3 id="heuristic-7-flexibility-and-efficiency-of-use">Heuristic 7: Flexibility and Efficiency of Use</h3>
+<p><em>Accelerators — unseen by the novice user — may often speed up the interaction for the expert user.</em></p>
+<ul>
+<li><strong>Observations:</strong>
+<ul>
+<li><strong>Filters:</strong> Dashboards have filters for status (Draft, Published), aiding quick retrieval.</li>
+<li><strong>Quick Actions:</strong> Prominent buttons for high-frequency tasks.</li>
+</ul>
+</li>
+<li><strong>Issues Identified:</strong>
+<ul>
+<li>No bulk actions (e.g., &quot;Bulk Approve&quot; for SPC) observed in the current prototype.</li>
+</ul>
+</li>
+<li><strong>Severity:</strong> 2 (Minor Usability Problem)</li>
+<li><strong>Recommendations:</strong>
+<ul>
+<li>Implement bulk selection and action capabilities in the SPC &quot;Pending Drives&quot; table.</li>
+</ul>
+</li>
+</ul>
+<h3 id="heuristic-8-aesthetic-and-minimalist-design">Heuristic 8: Aesthetic and Minimalist Design</h3>
+<p><em>Dialogues should not contain information which is irrelevant or rarely needed.</em></p>
+<ul>
+<li><strong>Observations:</strong>
+<ul>
+<li>The UI is clean, using ample whitespace and a &quot;Card&quot; metaphor.</li>
+<li>Information is progressively disclosed (e.g., Wizard steps, Tabs in Drive Details).</li>
+<li><strong>Visuals:</strong> Use of icons (Lucide React) adds visual cues without clutter.</li>
+</ul>
+</li>
+<li><strong>Issues Identified:</strong>
+<ul>
+<li>None. The design adheres well to modern, minimalist principles.</li>
+</ul>
+</li>
+<li><strong>Severity:</strong> 0 (No Usability Problem)</li>
+<li><strong>Recommendations:</strong>
+<ul>
+<li>Maintain the current visual hierarchy.</li>
+</ul>
+</li>
+</ul>
+<h3 id="heuristic-9-help-users-recognize-diagnose-and-recover-from-errors">Heuristic 9: Help Users Recognize, Diagnose, and Recover from Errors</h3>
+<p><em>Error messages should be expressed in plain language (no codes), precisely indicate the problem, and suggest a solution.</em></p>
+<ul>
+<li><strong>Observations:</strong>
+<ul>
+<li><strong>Form Validation:</strong> The Wizard shows &quot;Please fill all required fields&quot; toast.</li>
+<li><strong>Input Fields:</strong> Required fields are marked with asterisks.</li>
+</ul>
+</li>
+<li><strong>Issues Identified:</strong>
+<ul>
+<li>Validation messages are generic (&quot;Please fill all required fields&quot;) rather than specific (e.g., &quot;Company Name is required&quot;).</li>
+<li>No inline error text below specific invalid inputs; relies on global toasts.</li>
+</ul>
+</li>
+<li><strong>Severity:</strong> 3 (Major Usability Problem)</li>
+<li><strong>Recommendations:</strong>
+<ul>
+<li>Implement inline field validation messages (red text below the input) for immediate, specific feedback.</li>
+</ul>
+</li>
+</ul>
+<h3 id="heuristic-10-help-and-documentation">Heuristic 10: Help and Documentation</h3>
+<p><em>Even though it is better if the system can be used without documentation, it may be necessary to provide help and documentation.</em></p>
+<ul>
+<li><strong>Observations:</strong>
+<ul>
+<li><strong>Contextual Help:</strong> &quot;Info&quot; icons in the Wizard provide curriculum details.</li>
+<li><strong>Helper Text:</strong> Input fields have helper text (e.g., &quot;Enter the total annual cost to company&quot;).</li>
+</ul>
+</li>
+<li><strong>Issues Identified:</strong>
+<ul>
+<li>No dedicated &quot;Help Center&quot; or &quot;FAQ&quot; section for users (e.g., &quot;How to calculate CGPA?&quot;).</li>
+</ul>
+</li>
+<li><strong>Severity:</strong> 1 (Cosmetic Problem)</li>
+<li><strong>Recommendations:</strong>
+<ul>
+<li>Add a &quot;Help&quot; link in the navigation bar or a floating support widget.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="prioritized-fix-list">Prioritized Fix List</h2>
+<h3 id="%F0%9F%94%B4-must-fix-critical">🔴 Must Fix (Critical)</h3>
+<ol>
+<li><strong>Inline Validation (Heuristic 9):</strong> Replace generic error toasts with specific, inline error messages in forms (especially the Wizard) to help users diagnose issues faster.</li>
+</ol>
+<h3 id="%F0%9F%9F%A1-should-fix-important">🟡 Should Fix (Important)</h3>
+<ol>
+<li><strong>Skeleton Loaders (Heuristic 1):</strong> Add loading states for dashboards to improve perceived performance.</li>
+<li><strong>Bulk Actions (Heuristic 7):</strong> Allow SPCs to bulk approve/reject drives to improve efficiency.</li>
+<li><strong>Undo Actions (Heuristic 3):</strong> Add &quot;Undo&quot; functionality for destructive actions like declining offers.</li>
+</ol>
+<h3 id="%F0%9F%9F%A2-could-fix-nice-to-have">🟢 Could Fix (Nice-to-Have)</h3>
+<ol>
+<li><strong>Pre-defined Process Chips (Heuristic 6):</strong> Add quick-select chips for common interview rounds.</li>
+<li><strong>Sidebar Navigation (Heuristic 4):</strong> Refactor SPC/Recruiter layout to use a sidebar for better scalability.</li>
+<li><strong>Help Center (Heuristic 10):</strong> Add a dedicated help section.</li>
+</ol>
+<hr>
+<p><strong>Overall UX Summary:</strong>
+The IMS prototype is a robust, user-friendly application that scores highly on <strong>Match with Real World</strong> and <strong>Aesthetic Design</strong>. The role-based workflows are logical and well-structured. The primary area for improvement is <strong>Error Recovery</strong> (specifically inline validation) and <strong>Efficiency</strong> (bulk actions for admins). Addressing the &quot;Must Fix&quot; item will bring the prototype to a near-production usability standard.</p>
+
+</body>
+</html>

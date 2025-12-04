@@ -52,24 +52,47 @@ export function CreateDriveWizard({ onBack, onComplete, initialData }: CreateDri
 
   const totalSteps = 5; // 4 Input Steps + 1 Review
 
-  const handleNext = () => {
-    if (step === 1) {
-      if (!companyName || !hrName || !hrEmail) {
-        showToast('Please fill all required fields', 'error');
-        return;
+  // Error State
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validateStep = (currentStep: number) => {
+    const newErrors: Record<string, string> = {};
+    let isValid = true;
+
+    if (currentStep === 1) {
+      if (!companyName.trim()) newErrors.companyName = 'Company Name is required';
+      if (!hrName.trim()) newErrors.hrName = 'HR Name is required';
+      if (!hrEmail.trim()) {
+        newErrors.hrEmail = 'HR Email is required';
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(hrEmail)) {
+        newErrors.hrEmail = 'Invalid email format';
       }
-    } else if (step === 2) {
-      if (!role || !description || !deadline) {
-        showToast('Please fill all required fields', 'error');
-        return;
-      }
-    } else if (step === 4) {
-      if (!ctc) {
-        showToast('Please enter CTC', 'error');
-        return;
-      }
+    } else if (currentStep === 2) {
+      if (!role.trim()) newErrors.role = 'Job Role is required';
+      if (!description.trim()) newErrors.description = 'Job Description is required';
+      if (!deadline) newErrors.deadline = 'Registration Deadline is required';
+      if (!minCGPA) newErrors.minCGPA = 'Minimum CGPA is required';
+      if (!maxBacklogs) newErrors.maxBacklogs = 'Max Backlogs is required';
+    } else if (currentStep === 4) {
+      if (!ctc) newErrors.ctc = 'Annual CTC is required';
     }
-    setStep(step + 1);
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleNext = () => {
+    if (validateStep(step)) {
+      setStep(step + 1);
+    } else {
+      showToast('Please fix the errors before proceeding', 'error');
+    }
+  };
+
+  const clearError = (field: string) => {
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
   };
 
   const handleSubmit = () => {
@@ -187,7 +210,8 @@ export function CreateDriveWizard({ onBack, onComplete, initialData }: CreateDri
                 label="Company Name *"
                 placeholder="Enter company name"
                 value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
+                onChange={(e) => { setCompanyName(e.target.value); clearError('companyName'); }}
+                error={errors.companyName}
                 required
               />
               <div className="grid grid-cols-2 gap-4">
@@ -212,8 +236,9 @@ export function CreateDriveWizard({ onBack, onComplete, initialData }: CreateDri
                 label="HR Name *"
                 placeholder="Contact Person Name"
                 value={hrName}
-                onChange={(e) => setHrName(e.target.value)}
+                onChange={(e) => { setHrName(e.target.value); clearError('hrName'); }}
                 icon={<UserCircle size={18} />}
+                error={errors.hrName}
                 required
               />
               <Input
@@ -221,7 +246,8 @@ export function CreateDriveWizard({ onBack, onComplete, initialData }: CreateDri
                 type="email"
                 placeholder="hr@company.com"
                 value={hrEmail}
-                onChange={(e) => setHrEmail(e.target.value)}
+                onChange={(e) => { setHrEmail(e.target.value); clearError('hrEmail'); }}
+                error={errors.hrEmail}
                 required
               />
             </div>
@@ -241,7 +267,8 @@ export function CreateDriveWizard({ onBack, onComplete, initialData }: CreateDri
                   label="Job Role *"
                   placeholder="e.g., Software Development Engineer"
                   value={role}
-                  onChange={(e) => setRole(e.target.value)}
+                  onChange={(e) => { setRole(e.target.value); clearError('role'); }}
+                  error={errors.role}
                   required
                 />
                 <TextArea
@@ -249,14 +276,16 @@ export function CreateDriveWizard({ onBack, onComplete, initialData }: CreateDri
                   rows={4}
                   placeholder="Describe the role, responsibilities, and required skills..."
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={(e) => { setDescription(e.target.value); clearError('description'); }}
+                  error={errors.description}
                   required
                 />
                 <Input
                   label="Registration Deadline *"
                   type="datetime-local"
                   value={deadline}
-                  onChange={(e) => setDeadline(e.target.value)}
+                  onChange={(e) => { setDeadline(e.target.value); clearError('deadline'); }}
+                  error={errors.deadline}
                   required
                 />
               </div>
@@ -275,7 +304,8 @@ export function CreateDriveWizard({ onBack, onComplete, initialData }: CreateDri
                     max="10"
                     placeholder="7.0"
                     value={minCGPA}
-                    onChange={(e) => setMinCGPA(e.target.value)}
+                    onChange={(e) => { setMinCGPA(e.target.value); clearError('minCGPA'); }}
+                    error={errors.minCGPA}
                     required
                   />
                   <Input
@@ -284,7 +314,8 @@ export function CreateDriveWizard({ onBack, onComplete, initialData }: CreateDri
                     min="0"
                     placeholder="0"
                     value={maxBacklogs}
-                    onChange={(e) => setMaxBacklogs(e.target.value)}
+                    onChange={(e) => { setMaxBacklogs(e.target.value); clearError('maxBacklogs'); }}
+                    error={errors.maxBacklogs}
                     required
                   />
                 </div>
@@ -424,8 +455,9 @@ export function CreateDriveWizard({ onBack, onComplete, initialData }: CreateDri
                   type="number"
                   placeholder="1200000"
                   value={ctc}
-                  onChange={(e) => setCTC(e.target.value)}
+                  onChange={(e) => { setCTC(e.target.value); clearError('ctc'); }}
                   helperText="Enter the total annual cost to company"
+                  error={errors.ctc}
                   required
                 />
                 {ctc && (
